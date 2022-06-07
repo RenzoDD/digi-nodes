@@ -1,0 +1,3 @@
+DROP DATABASE IF EXISTS diginodes;
+CREATE DATABASE IF NOT EXISTS diginodes;
+USE diginodes;

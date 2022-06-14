@@ -1,5 +1,5 @@
 {
-  "name": "digi-crawler",
+  "name": "digi-nodes",
   "version": "0.0.0",
   "description": "Node scaner for the DigiByte blockchain",
   "main": "src/index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RenzoDD/digi-crawler.git"
+    "url": "git+https://github.com/RenzoDD/digi-nodes.git"
   },
   "keywords": [
     "digibyte",
@@ -19,7 +19,11 @@
   "author": "Renzo Diaz",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/RenzoDD/digi-crawler/issues"
+    "url": "https://github.com/RenzoDD/digi-nodes/issues"
   },
-  "homepage": "https://github.com/RenzoDD/digi-crawler#readme"
+  "homepage": "https://github.com/RenzoDD/digi-nodes#readme",
+  "dependencies": {
+    "digibyte-js-p2p": "^1.0.0",
+    "mysql": "^2.18.1"
+  }
 }

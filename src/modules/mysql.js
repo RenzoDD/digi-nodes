@@ -23,8 +23,11 @@ class MySQL {
                 MySQL.Connect();
 
             MySQL.connection.query(query, params, function (error, results, fields) {
-                if (error) resolve([]);
-                resolve(results);
+                if (error) {
+                    console.log(error)
+                    resolve([]);
+                }
+                resolve(results[0]);
             });
         });
     }

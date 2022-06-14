@@ -25,7 +25,7 @@ BEGIN
 	SET @id = NULL;
 	SET @ip = NULL;
 	SET @port = NULL;
-	SET @time = UNXI_TIMESTAMP();
+	SET @time = UNIX_TIMESTAMP();
 
 	SELECT N.NodeID, N.IP, N.Port INTO @id, @ip, @port
 	FROM Nodes AS N
@@ -36,7 +36,7 @@ BEGIN
 		VALUES (IP, Port, @time);
 	END IF;
 	
-	SELECT N.NodeID, N.IP, N.Port
+	SELECT N.*
 	FROM Nodes AS N
 	WHERE N.IP = IP AND N.Port = Port;
 END //
@@ -44,7 +44,7 @@ END //
 DROP PROCEDURE IF EXISTS UpdateNode //
 CREATE PROCEDURE UpdateNode ( IN NodeID INTEGER, IN StateID INTEGER, IN CountryID INTEGER, IN VersionID INTEGER, IN SubversionID INTEGER, IN Longitude DECIMAL(9,6), IN Latitude DECIMAL(8,6) )
 BEGIN
-	SET @time = UNXI_TIMESTAMP();
+	SET @time = UNIX_TIMESTAMP();
 
 	UPDATE Nodes AS N
 	SET N.StateID = StateID
@@ -63,4 +63,13 @@ BEGIN
 	  AND N.SubversionID <=> SubversionID
 	  AND N.Longitude <=> Longitude
 	  AND N.Latitude <=> Latitude;
+END //
+
+DROP PROCEDURE IF EXISTS SelectOneNodeByState //
+CREATE PROCEDURE SelectOneNodeByState ( IN StateID INTEGER )
+BEGIN
+	SELECT N.*
+	FROM Nodes AS N
+	WHERE N.StateID = StateID
+	LIMIT 1;
 END //

@@ -29,23 +29,27 @@ console.log = function () {
 };
 
 class Crawler {
-    static async CheckNode(host, port) {
+    static async CheckNode(host, port, ping = false) {
         return new Promise(async (resolve, reject) => {
             console.log("Checking:", host, port)
             let nodeA = await MySQL.Query('CALL SelectNode(?,?)', [host, port]);
 
             var peer = new Peer({ host, port });
             peer.on('ready', async function () {
-                console.log("Found:", peer.version, peer.subversion)
+                console.log("Found:", host, port, peer.version, peer.subversion, peer.bestHeight)
                 var version = await MySQL.Query('CALL SelectVersionByNumber(?)', [peer.version]);
                 var subversion = await MySQL.Query('CALL SelectSubversionByName(?)', [peer.subversion]);
 
-                await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 2, null, version[0].VersionID, subversion[0].SubversionID, null, null])
+                await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 2, null, version[0].VersionID, subversion[0].SubversionID, null, null]);
+
+                if (ping)
+                    resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight });
+
                 peer.sendMessage((new Messages()).GetAddr());
             });
 
             peer.on('error', async function () {
-                console.log("Error:", host, port)
+                console.log("Error:", host, port);
                 await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 3, nodeA[0].CountryID, nodeA[0].VersionID, nodeA[0].SubversionID, nodeA[0].Longitude, nodeA[0].Latitude]);
                 resolve(false);
             })
@@ -58,8 +62,12 @@ class Crawler {
                         var nodeB = await MySQL.Query('CALL SelectNode(?,?)', [address.ip.v6, address.port]);
                     await MySQL.Query('CALL SelectConnections(?, ?)', [nodeA[0].NodeID, nodeB[0].NodeID]);
                 }
+
                 peer.disconnect();
-                resolve(true);
+                console.log("Found:", host, port, message.addresses.length);
+
+                if (ping === false)
+                    resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight });
             });
 
             peer.connect();

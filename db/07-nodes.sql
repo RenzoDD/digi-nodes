@@ -73,3 +73,12 @@ BEGIN
 	WHERE N.StateID = StateID
 	LIMIT 1;
 END //
+
+DROP PROCEDURE IF EXISTS SelectNodesPerSubVersion //
+CREATE PROCEDURE SelectNodesPerSubVersion ()
+BEGIN
+	SELECT S.Name, COUNT(*) AS Quantity
+	FROM Nodes AS N, Subversions AS S
+	WHERE N.SubversionID = S.SubversionID
+    GROUP BY N.SubversionID;
+END //

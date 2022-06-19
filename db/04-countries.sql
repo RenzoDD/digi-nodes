@@ -1,24 +1,24 @@
 DELIMITER //
 DROP TABLE IF EXISTS Countries // 
 CREATE TABLE Countries (
-	CountryID	INTEGER	NOT NULL	AUTO_INCREMENT,
-	Name		TEXT	NOT NULL	UNIQUE,
+	CountryID	INTEGER			NOT NULL	AUTO_INCREMENT,
+	Name		VARCHAR(255)	NOT NULL	UNIQUE,
+	Code		VARCHAR(15)		NOT NULL	UNIQUE,
 	PRIMARY KEY (CountryID)
 ) //
 
 DROP PROCEDURE IF EXISTS SelectCountryByName //
-CREATE PROCEDURE SelectCountryByName ( IN Name TEXT )
+CREATE PROCEDURE SelectCountryByName ( IN Name TEXT, IN Code TEXT )
 BEGIN
 	SET @id = NULL;
-	SET @name = NULL;
     
-	SELECT C.CountryID, C.Name INTO @id, @name
+	SELECT C.CountryID INTO @id
 	FROM Countries AS C
-	WHERE C.Name = Name;
+	WHERE C.Name = Name AND C.Code = Code;
     
     IF isnull(@id) THEN
-		INSERT INTO Countries (Name)
-        VALUES (Name);
+		INSERT INTO Countries (Name, Code)
+        VALUES (Name, Code);
     END IF;
         
     SELECT C.*

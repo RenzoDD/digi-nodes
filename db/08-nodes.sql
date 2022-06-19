@@ -4,6 +4,7 @@ CREATE TABLE Nodes (
 	NodeID			INTEGER			NOT NULL	AUTO_INCREMENT,
 	StateID			INTEGER 		NOT NULL	DEFAULT 1,
 	CountryID		INTEGER,
+	ProviderID		INTEGER,
 	VersionID		INTEGER,
 	SubversionID	INTEGER,
 	IP				TEXT			NOT NULL,
@@ -14,6 +15,7 @@ CREATE TABLE Nodes (
 	PRIMARY KEY (NodeID),
 	FOREIGN KEY (StateID) REFERENCES States(StateID),
 	FOREIGN KEY (CountryID) REFERENCES Countries(CountryID),
+	FOREIGN KEY (ProviderID) REFERENCES Providers(ProviderID),
 	FOREIGN KEY (VersionID) REFERENCES Versions(VersionID),
 	FOREIGN KEY (SubversionID) REFERENCES Subversions(SubversionID),
 	UNIQUE (IP, Port)
@@ -41,26 +43,41 @@ BEGIN
 	WHERE N.IP = IP AND N.Port = Port;
 END //
 
-DROP PROCEDURE IF EXISTS UpdateNode //
-CREATE PROCEDURE UpdateNode ( IN NodeID INTEGER, IN StateID INTEGER, IN CountryID INTEGER, IN VersionID INTEGER, IN SubversionID INTEGER, IN Longitude DECIMAL(9,6), IN Latitude DECIMAL(8,6) )
+DROP PROCEDURE IF EXISTS UpdateNodeInfo //
+CREATE PROCEDURE UpdateNodeInfo ( IN NodeID INTEGER, IN StateID INTEGER, IN VersionID INTEGER, IN SubversionID INTEGER )
 BEGIN
 	SET @time = UNIX_TIMESTAMP();
 
 	UPDATE Nodes AS N
 	SET N.StateID = StateID
-	  , N.CountryID = CountryID
 	  , N.VersionID = VersionID
 	  , N.SubversionID = SubversionID
-	  , N.Longitude = Longitude
-	  , N.Latitude = Latitude
+	  , N.CheckTime = @time
 	WHERE N.NodeID = NodeID;
 
 	SELECT N.*
 	FROM Nodes AS N
 	WHERE N.StateID <=> StateID
-	  AND N.CountryID <=> CountryID
 	  AND N.VersionID <=> VersionID
 	  AND N.SubversionID <=> SubversionID
+	  AND N.CheckTime = @time;
+END //
+
+DROP PROCEDURE IF EXISTS UpdateNodeLocation //
+CREATE PROCEDURE UpdateNodeLocation ( IN IP TEXT, IN CountryID INTEGER, IN ProviderID INTEGER, IN Longitude DECIMAL(9,6), IN Latitude DECIMAL(8,6) )
+BEGIN
+	UPDATE Nodes AS N
+	SET N.CountryID = CountryID
+	  , N.ProviderID = ProviderID
+	  , N.Longitude = Longitude
+	  , N.Latitude = Latitude
+	WHERE N.IP = IP;
+
+	SELECT N.*
+	FROM Nodes AS N
+	WHERE N.IP <=> IP
+	  AND N.CountryID <=> CountryID
+	  AND N.ProviderID <=> ProviderID
 	  AND N.Longitude <=> Longitude
 	  AND N.Latitude <=> Latitude;
 END //
@@ -91,4 +108,24 @@ BEGIN
 	FROM Nodes AS N, Subversions AS S
 	WHERE N.SubversionID = S.SubversionID
     GROUP BY N.SubversionID;
+END //
+
+DROP PROCEDURE IF EXISTS SelectUnlocatedNodeByState //
+CREATE PROCEDURE SelectUnlocatedNodeByState ( IN StateID INTEGER )
+BEGIN
+	SELECT N.*, RAND() AS Random
+	FROM Nodes AS N
+	WHERE N.StateID = StateID
+		  AND isnull(N.Longitude)
+		  AND isnull(N.Latitude)
+	ORDER BY Random
+	LIMIT 1;
+END //
+
+DROP PROCEDURE IF EXISTS ResetCheckedNodes //
+CREATE PROCEDURE ResetCheckedNodes ( )
+BEGIN
+	UPDATE Nodes AS N
+	SET N.StateID = 1
+	WHERE N.StateID = 3;
 END //

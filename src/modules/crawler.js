@@ -1,6 +1,7 @@
 const p2p = require('digibyte-js-p2p');
 const Peer = require('digibyte-js-p2p/lib/peer');
 const Messages = require('digibyte-js-p2p/lib/messages');
+const Request = require('./request');
 const MySQL = require('./mysql');
 
 console.log = function () {
@@ -36,10 +37,10 @@ class Crawler {
             let nodeA = await MySQL.Query('CALL SelectNode(?,?)', [host, port]);
 
             var peer = new Peer({ host, port });
-            const myTimeout = setTimeout(async () => { 
+            const myTimeout = setTimeout(async () => {
                 console.log("Timeout:", host, port);
-                await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 3, nodeA[0].CountryID, nodeA[0].VersionID, nodeA[0].SubversionID, nodeA[0].Longitude, nodeA[0].Latitude]);
-                if (!resolved) { resolve(false); resolved = true; } 
+                await MySQL.Query('CALL UpdateNodeInfo(?,?,?,?)', [nodeA[0].NodeID, 3, nodeA[0].VersionID, nodeA[0].SubversionID]);
+                if (!resolved) { resolve(false); resolved = true; }
             }, 5000);
 
             peer.on('ready', async function () {
@@ -47,7 +48,7 @@ class Crawler {
                 var version = await MySQL.Query('CALL SelectVersionByNumber(?)', [peer.version]);
                 var subversion = await MySQL.Query('CALL SelectSubversionByName(?)', [peer.subversion]);
 
-                await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 2, null, version[0].VersionID, subversion[0].SubversionID, null, null]);
+                await MySQL.Query('CALL UpdateNodeInfo(?,?,?,?)', [nodeA[0].NodeID, 2, version[0].VersionID, subversion[0].SubversionID]);
 
                 if (ping)
                     if (!resolved) { resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight }); resolved = true; }
@@ -59,7 +60,7 @@ class Crawler {
 
             peer.on('error', async function () {
                 console.log("Error:", host, port);
-                await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 3, nodeA[0].CountryID, nodeA[0].VersionID, nodeA[0].SubversionID, nodeA[0].Longitude, nodeA[0].Latitude]);
+                await MySQL.Query('CALL UpdateNodeInfo(?,?,?,?)', [nodeA[0].NodeID, 3, nodeA[0].VersionID, nodeA[0].SubversionID]);
                 if (!resolved) { resolve(false); resolved = true; }
             })
 
@@ -82,14 +83,39 @@ class Crawler {
             peer.connect();
         });
     }
-    static async Checker() {
-        if (Math.floor(Math.random() * 10) !== 0)
-            var node = await MySQL.Query('CALL SelectOneNodeByState(1)'); // Check
-        else
-            var node = await MySQL.Query('CALL SelectRandomNodeByState(2)'); // Recheck
+    static async Locator(host) {
+        console.log("Locating:", host)
+        var data = await Request.Get("http://ip-api.com/json/" + host + "?fields=status,country,countryCode,lat,lon,isp");
 
-        if (node.length > 0) {
-            await Crawler.CheckNode(node[0].IP, node[0].Port)
+        if (data === null)
+            return;
+
+        if (data.status !== "success")
+            return;
+
+        var country = await MySQL.Query("CALL SelectCountryByName(?, ?)", [data.country, data.countryCode]);
+        var provider = await MySQL.Query("CALL SelectProviderByName(?)", [data.isp]);
+        console.log(country, provider);
+        await MySQL.Query("CALL UpdateNodeLocation(?,?,?,?,?)", [host, country[0].CountryID, provider[0].ProviderID, data.lon, data.lat]);
+        console.log("Located:", host, data.country, data.isp, data.lon, data.lat);
+    }
+    static async Checker() {
+        if (Math.floor(Math.random() * 10) !== 0) {
+            var node = await MySQL.Query('CALL SelectOneNodeByState(1)'); // Check
+            if (node.length == 0)
+                await MySQL.Query("CALL ResetCheckedNodes()");
+            else
+                await Crawler.CheckNode(node[0].IP, node[0].Port);
+        }
+        if (Math.floor(Math.random() * 2) === 0) {
+            var node = await MySQL.Query('CALL SelectRandomNodeByState(2)'); // Recheck
+            if (node.length > 0)
+                await Crawler.CheckNode(node[0].IP, node[0].Port)
+            
+        } else {
+            var node = await MySQL.Query("CALL SelectUnlocatedNodeByState(2)");
+            if (node.length > 0)
+                await Crawler.Locator(node[0].IP);
         }
 
         setTimeout(Crawler.Checker, 100);

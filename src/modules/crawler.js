@@ -32,9 +32,16 @@ class Crawler {
     static async CheckNode(host, port, ping = false) {
         return new Promise(async (resolve, reject) => {
             console.log("Checking:", host, port)
+            let resolved = false;
             let nodeA = await MySQL.Query('CALL SelectNode(?,?)', [host, port]);
 
             var peer = new Peer({ host, port });
+            const myTimeout = setTimeout(async () => { 
+                console.log("Timeout:", host, port);
+                await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 3, nodeA[0].CountryID, nodeA[0].VersionID, nodeA[0].SubversionID, nodeA[0].Longitude, nodeA[0].Latitude]);
+                if (!resolved) { resolve(false); resolved = true; } 
+            }, 5000);
+
             peer.on('ready', async function () {
                 console.log("Found:", host, port, peer.version, peer.subversion, peer.bestHeight)
                 var version = await MySQL.Query('CALL SelectVersionByNumber(?)', [peer.version]);
@@ -43,15 +50,17 @@ class Crawler {
                 await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 2, null, version[0].VersionID, subversion[0].SubversionID, null, null]);
 
                 if (ping)
-                    resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight });
+                    if (!resolved) { resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight }); resolved = true; }
 
+                clearTimeout(myTimeout);
+                setTimeout(() => { if (!resolved) { resolve(false); resolved = true; } }, 30000);
                 peer.sendMessage((new Messages()).GetAddr());
             });
 
             peer.on('error', async function () {
                 console.log("Error:", host, port);
                 await MySQL.Query('CALL UpdateNode(?,?,?,?,?,?,?)', [nodeA[0].NodeID, 3, nodeA[0].CountryID, nodeA[0].VersionID, nodeA[0].SubversionID, nodeA[0].Longitude, nodeA[0].Latitude]);
-                resolve(false);
+                if (!resolved) { resolve(false); resolved = true; }
             })
 
             peer.on('addr', async function (message) {
@@ -67,17 +76,17 @@ class Crawler {
                 console.log("Found:", host, port, message.addresses.length);
 
                 if (ping === false)
-                    resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight });
+                    if (!resolved) { resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight }); resolved = true; }
             });
 
             peer.connect();
         });
     }
     static async Checker() {
-        if (Math.floor(Math.random() * 5) > 0)
+        if (Math.floor(Math.random() * 10) !== 0)
             var node = await MySQL.Query('CALL SelectOneNodeByState(1)'); // Check
         else
-            var node = await MySQL.Query('CALL SelectOneNodeByState(2)'); // Recheck
+            var node = await MySQL.Query('CALL SelectRandomNodeByState(2)'); // Recheck
 
         if (node.length > 0) {
             await Crawler.CheckNode(node[0].IP, node[0].Port)

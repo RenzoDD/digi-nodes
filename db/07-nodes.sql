@@ -74,6 +74,16 @@ BEGIN
 	LIMIT 1;
 END //
 
+DROP PROCEDURE IF EXISTS SelectRandomNodeByState //
+CREATE PROCEDURE SelectRandomNodeByState ( IN StateID INTEGER )
+BEGIN
+	SELECT N.*, RAND() AS Random
+	FROM Nodes AS N
+	WHERE N.StateID = StateID
+	ORDER BY Random
+	LIMIT 1;
+END //
+
 DROP PROCEDURE IF EXISTS SelectNodesPerSubVersion //
 CREATE PROCEDURE SelectNodesPerSubVersion ()
 BEGIN

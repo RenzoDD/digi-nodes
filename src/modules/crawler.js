@@ -95,7 +95,7 @@ class Crawler {
 
         var country = await MySQL.Query("CALL SelectCountryByName(?, ?)", [data.country, data.countryCode]);
         var provider = await MySQL.Query("CALL SelectProviderByName(?)", [data.isp]);
-        console.log(country, provider);
+        
         await MySQL.Query("CALL UpdateNodeLocation(?,?,?,?,?)", [host, country[0].CountryID, provider[0].ProviderID, data.lon, data.lat]);
         console.log("Located:", host, data.country, data.isp, data.lon, data.lat);
     }

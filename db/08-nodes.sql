@@ -7,7 +7,7 @@ CREATE TABLE Nodes (
 	ProviderID		INTEGER,
 	VersionID		INTEGER,
 	SubversionID	INTEGER,
-	IP				TEXT			NOT NULL,
+	IP				VARCHAR(255)	NOT NULL,
 	Port			INTEGER			NOT NULL,
 	Longitude		DECIMAL(9,6),
 	Latitude		DECIMAL(8,6),
@@ -101,6 +101,38 @@ BEGIN
 	LIMIT 1;
 END //
 
+DROP PROCEDURE IF EXISTS SelectAllNodes //
+CREATE PROCEDURE SelectAllNodes ()
+BEGIN
+	SELECT N.IP AS 'ip', N.Port AS 'port', V.Number AS 'version', S.Name AS 'subversion'
+	FROM Nodes AS N, Subversions AS S, Versions AS V
+	WHERE N.SubversionID = S.SubversionID
+		AND N.VersionID = V.VersionID
+		AND N.StateID = 2;
+END //
+
+DROP PROCEDURE IF EXISTS SelectAllNodesInfo //
+CREATE PROCEDURE SelectAllNodesInfo ()
+BEGIN
+	SELECT N.IP AS 'ip', N.Port AS 'port', V.Number AS 'version', S.Name AS 'subversion', C.Name AS 'country', P.Name AS 'provider'
+	FROM Nodes AS N, Subversions AS S, Versions AS V, Countries AS C, Providers AS P
+	WHERE N.SubversionID = S.SubversionID
+		AND N.VersionID = V.VersionID
+		AND N.CountryID = C.CountryID
+		AND N.ProviderID = P.ProviderID
+		AND N.StateID = 2;
+END //
+
+DROP PROCEDURE IF EXISTS SelectAllNodesLocation //
+CREATE PROCEDURE SelectAllNodesLocation ()
+BEGIN
+	SELECT N.IP AS 'ip', N.Port AS 'port', V.Number AS 'version', S.Name AS 'subversion', N.Longitude AS 'longitude', N.Latitude AS 'latitude'
+	FROM Nodes AS N, Subversions AS S, Versions AS V
+	WHERE N.SubversionID = S.SubversionID
+		AND N.VersionID = V.VersionID
+		AND N.StateID = 2;
+END //
+
 DROP PROCEDURE IF EXISTS SelectNodesPerSubVersion //
 CREATE PROCEDURE SelectNodesPerSubVersion ()
 BEGIN
@@ -108,6 +140,16 @@ BEGIN
 	FROM Nodes AS N, Subversions AS S
 	WHERE N.SubversionID = S.SubversionID
     GROUP BY N.SubversionID;
+END //
+
+DROP PROCEDURE IF EXISTS SelectNodesPerCountry //
+CREATE PROCEDURE SelectNodesPerCountry ()
+BEGIN
+	SELECT C.Name, C.Code, COUNT(*) AS Quantity
+	FROM Nodes AS N, Countries AS C
+	WHERE N.CountryID = C.CountryID
+    GROUP BY C.Name
+	ORDER BY Quantity DESC;
 END //
 
 DROP PROCEDURE IF EXISTS SelectUnlocatedNodeByState //

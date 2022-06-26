@@ -100,6 +100,7 @@ class Crawler {
         console.log("Located:", host, data.country, data.isp, data.lon, data.lat);
     }
     static async Checker() {
+        
         if (Math.floor(Math.random() * 10) !== 0) {
             var node = await MySQL.Query('CALL SelectOneNodeByState(1)'); // Check
             if (node.length == 0)
@@ -117,8 +118,7 @@ class Crawler {
             if (node.length > 0)
                 await Crawler.Locator(node[0].IP);
         }
-
-        setTimeout(Crawler.Checker, 100);
+        setTimeout(Crawler.Checker, 2000);
     }
 }
 

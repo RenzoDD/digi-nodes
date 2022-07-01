@@ -123,6 +123,17 @@ BEGIN
 		AND N.StateID = 2;
 END //
 
+DROP PROCEDURE IF EXISTS SelectAllNodesCountryLocation //
+CREATE PROCEDURE SelectAllNodesCountryLocation ()
+BEGIN
+	SELECT N.IP AS 'ip', N.Port AS 'port', V.Number AS 'version', S.Name AS 'subversion', C.Code AS 'country', N.Longitude AS 'longitude', N.Latitude AS 'latitude'
+	FROM Nodes AS N, Subversions AS S, Versions AS V, Countries AS C
+	WHERE N.SubversionID = S.SubversionID
+		AND N.VersionID = V.VersionID
+		AND N.CountryID = C.CountryID
+		AND N.StateID = 2;
+END //
+
 DROP PROCEDURE IF EXISTS SelectAllNodesLocation //
 CREATE PROCEDURE SelectAllNodesLocation ()
 BEGIN
@@ -139,6 +150,7 @@ BEGIN
 	SELECT S.Name, COUNT(*) AS Quantity
 	FROM Nodes AS N, Subversions AS S
 	WHERE N.SubversionID = S.SubversionID
+		  AND N.StateID = 2
     GROUP BY N.SubversionID;
 END //
 

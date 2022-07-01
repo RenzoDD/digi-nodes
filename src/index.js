@@ -1,5 +1,5 @@
 const Crawler = require('./modules/crawler');
-//Crawler.Checker();
+Crawler.Checker();
 
 const express = require('express');
 const app = express();

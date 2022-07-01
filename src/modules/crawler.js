@@ -51,7 +51,7 @@ class Crawler {
                 await MySQL.Query('CALL UpdateNodeInfo(?,?,?,?)', [nodeA[0].NodeID, 2, version[0].VersionID, subversion[0].SubversionID]);
 
                 if (ping)
-                    if (!resolved) { resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight }); resolved = true; }
+                    if (!resolved) { resolve({ version: peer.version, subversion: peer.subversion, height: peer.bestHeight }); resolved = true; }
 
                 clearTimeout(myTimeout);
                 setTimeout(() => { if (!resolved) { resolve(false); resolved = true; } }, 30000);

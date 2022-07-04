@@ -29,6 +29,10 @@ console.log = function () {
     fs.appendFileSync("logs/" + date + ".log", datetime + ": " + text);
 };
 
+function CompressIPv6(ip) {
+    
+}
+
 class Crawler {
     static async CheckNode(host, port, ping = false) {
         return new Promise(async (resolve, reject) => {
@@ -54,7 +58,7 @@ class Crawler {
                     if (!resolved) { resolve({ version: peer.version, subversion: peer.subversion, height: peer.bestHeight }); resolved = true; }
 
                 clearTimeout(myTimeout);
-                setTimeout(() => { if (!resolved) { resolve(false); resolved = true; } }, 30000);
+                setTimeout(() => { if (!resolved) { resolve(false); resolved = true; } }, 60000);
                 peer.sendMessage((new Messages()).GetAddr());
             });
 
@@ -70,7 +74,6 @@ class Crawler {
                         var nodeB = await MySQL.Query('CALL SelectNode(?,?)', [address.ip.v4, address.port]);
                     else
                         var nodeB = await MySQL.Query('CALL SelectNode(?,?)', [address.ip.v6, address.port]);
-                    await MySQL.Query('CALL SelectConnections(?, ?)', [nodeA[0].NodeID, nodeB[0].NodeID]);
                 }
 
                 peer.disconnect();

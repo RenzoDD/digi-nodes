@@ -19,7 +19,9 @@ router.all('/peers/:info?', async function (req, res) {
     if (req.params.info === "info")
         var data = await MySQL.Query("CALL SelectAllNodesInfo ()");
     else if (req.params.info === "location")
-        var data = await MySQL.Query("CALL SelectAllNodesLocation ()");
+        var data = await MySQL.Query("CALL SelectAllNodesInfo ()");
+    else if (req.params.info === "country")
+        var data = await MySQL.Query("CALL SelectAllNodesCountryLocation ()");
     else
         var data = await MySQL.Query("CALL SelectAllNodes ()");
 
@@ -42,9 +44,9 @@ router.all('/countries/:min?', async function (req, res) {
         for (var row of data)
             answer[row.Code] = row.Quantity;
     } else {
-        var answer = [];
+        var answer = {};
         for (var row of data)
-            answer.push({ name: row.Name, quantity: row.Quantity });
+            answer[row.Name] = row.Quantity;
     }
     res.send(answer);
 });

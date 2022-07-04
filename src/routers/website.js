@@ -4,7 +4,7 @@ var express = require('express');
 var router = express.Router();
 
 router.all('/', async function (req, res) {
-    var locations = await MySQL.Query("CALL SelectAllNodesCountryLocation()");
+    var peers = await MySQL.Query("CALL SelectAllNodesCountryLocation()");
 
     var subversions = await MySQL.Query("CALL SelectNodesPerSubVersion()");
     var answer = {};
@@ -18,7 +18,7 @@ router.all('/', async function (req, res) {
         answer[row.Name] = row.Quantity;
     countries = answer;
 
-    res.render("index", { locations, subversions, countries });
+    res.render("index", { peers, subversions, countries });
 });
 
 module.exports = router;

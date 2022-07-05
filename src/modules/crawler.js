@@ -29,6 +29,10 @@ console.log = function () {
     fs.appendFileSync("logs/" + date + ".log", datetime + ": " + text);
 };
 
+function CompressIPv6(ip) {
+    
+}
+
 class Crawler {
     static async CheckNode(host, port, ping = false) {
         return new Promise(async (resolve, reject) => {
@@ -51,10 +55,10 @@ class Crawler {
                 await MySQL.Query('CALL UpdateNodeInfo(?,?,?,?)', [nodeA[0].NodeID, 2, version[0].VersionID, subversion[0].SubversionID]);
 
                 if (ping)
-                    if (!resolved) { resolve({ varsion: peer.version, subversion: peer.subversion, height: peer.bestHeight }); resolved = true; }
+                    if (!resolved) { resolve({ version: peer.version, subversion: peer.subversion, height: peer.bestHeight }); resolved = true; }
 
                 clearTimeout(myTimeout);
-                setTimeout(() => { if (!resolved) { resolve(false); resolved = true; } }, 30000);
+                setTimeout(() => { if (!resolved) { resolve(false); resolved = true; } }, 60000);
                 peer.sendMessage((new Messages()).GetAddr());
             });
 
@@ -70,7 +74,6 @@ class Crawler {
                         var nodeB = await MySQL.Query('CALL SelectNode(?,?)', [address.ip.v4, address.port]);
                     else
                         var nodeB = await MySQL.Query('CALL SelectNode(?,?)', [address.ip.v6, address.port]);
-                    await MySQL.Query('CALL SelectConnections(?, ?)', [nodeA[0].NodeID, nodeB[0].NodeID]);
                 }
 
                 peer.disconnect();
@@ -100,6 +103,7 @@ class Crawler {
         console.log("Located:", host, data.country, data.isp, data.lon, data.lat);
     }
     static async Checker() {
+        
         if (Math.floor(Math.random() * 10) !== 0) {
             var node = await MySQL.Query('CALL SelectOneNodeByState(1)'); // Check
             if (node.length == 0)
@@ -117,8 +121,7 @@ class Crawler {
             if (node.length > 0)
                 await Crawler.Locator(node[0].IP);
         }
-
-        setTimeout(Crawler.Checker, 100);
+        setTimeout(Crawler.Checker, 2000);
     }
 }
 

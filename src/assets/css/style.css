@@ -1,0 +1,58 @@
+@font-face {
+    font-family: Font;
+    src: url('../fonts/kdam-thmor-pro.woff') format('woff');
+}
+
+body {
+    font-family: Font;
+    /*
+    background-image: url("../img/background.png");
+    background-repeat: repeat;
+    */
+    background-color: #fff;
+    background-image: radial-gradient(circle, #EFEFEF 10%, transparent 10%), radial-gradient(circle, #EFEFEF 10%, transparent 10%);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+.link {
+    color: #0066CC;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.link:hover {
+    color: #5599DD;
+    font-weight: 1100;
+    text-decoration: none;
+}
+
+.bg-blue {
+    background-color: #002352 !important;
+}
+
+#map { height: 300px; }
+
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }

@@ -1,16 +1,24 @@
 # Digi Crawler
 
-![NodeJS Version](https://img.shields.io/badge/nodejs-16.14.2-blue)
+![Last commit](https://img.shields.io/github/last-commit/RenzoDD/digi-nodes)
+![Last release](https://img.shields.io/github/release-date/RenzoDD/digi-nodes)
+![NodeJS version](https://img.shields.io/badge/nodejs-16.14.2-blue)
 
 DigiByte Crawler is a node scaner for the DigiByte blockchain.
 
 ## Development 🛠️
 
 ```sh
-git clone https://github.com/RenzoDD/digi-crawler
-cd digi-crawler
+git clone https://github.com/RenzoDD/digi-nodes
+cd digi-nodes
 npm install
 ```
+```sh
+cd db
+type *.sql > script
+```
+
+Run the script into your MySQL database
 
 ## Security 🛡️
 

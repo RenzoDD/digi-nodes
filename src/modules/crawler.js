@@ -29,13 +29,27 @@ console.log = function () {
     fs.appendFileSync("logs/" + date + ".log", datetime + ": " + text);
 };
 
-function CompressIPv6(ip) {
-    
-}
+function UncompressIPv6(ip) {
+    if (ip.indexOf(":") == -1)
+        return ip;
 
+    if (ip[0] == '[')
+        ip = ip.substring(1);
+
+    if (ip[ip.length - 1] == ']')
+        ip = ip.substring(0, ip.length - 1);
+
+    var parts = ip.split(":");
+    var host = [];
+    for (var x of parts)
+        host.push(x.padStart(4, "0"))
+
+    return host.join(":");
+}
 class Crawler {
     static async CheckNode(host, port, ping = false) {
         return new Promise(async (resolve, reject) => {
+            host = UncompressIPv6(host);
             console.log("Checking:", host, port)
             let resolved = false;
             let nodeA = await MySQL.Query('CALL SelectNode(?,?)', [host, port]);
@@ -98,12 +112,12 @@ class Crawler {
 
         var country = await MySQL.Query("CALL SelectCountryByName(?, ?)", [data.country, data.countryCode]);
         var provider = await MySQL.Query("CALL SelectProviderByName(?)", [data.isp]);
-        
+
         await MySQL.Query("CALL UpdateNodeLocation(?,?,?,?,?)", [host, country[0].CountryID, provider[0].ProviderID, data.lon, data.lat]);
         console.log("Located:", host, data.country, data.isp, data.lon, data.lat);
     }
     static async Checker() {
-        
+
         if (Math.floor(Math.random() * 10) !== 0) {
             var node = await MySQL.Query('CALL SelectOneNodeByState(1)'); // Check
             if (node.length == 0)
@@ -115,7 +129,7 @@ class Crawler {
             var node = await MySQL.Query('CALL SelectRandomNodeByState(2)'); // Recheck
             if (node.length > 0)
                 await Crawler.CheckNode(node[0].IP, node[0].Port)
-            
+
         } else {
             var node = await MySQL.Query("CALL SelectUnlocatedNodeByState(2)");
             if (node.length > 0)

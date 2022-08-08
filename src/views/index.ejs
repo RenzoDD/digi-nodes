@@ -28,6 +28,18 @@
 	<main class="container my-3">
 		<div class="row justify-content-center mb-3">
 			<div class="col-md-8">
+				<div class="row justify-content-center">
+					<div class="col-md-4" id="count">
+
+					</div>
+					<div class="col-md-4" id="countries">
+
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row justify-content-center mb-3">
+			<div class="col-md-8">
 				<h1 class="text-center">SubVersions</h1>
 				<div class="row">
 					<div class="col-md-4">
@@ -130,20 +142,22 @@
 		<div class="row justify-content-center">
 			<div class="col-md-8">
 				<h1 class="text-center">DigiByte Peers</h1>
-				<table class="table">
-					<thead>
-						<tr>
-							<th scope="col">#</th>
-							<th scope="col">Address</th>
-							<th scope="col">Port</th>
-							<th scope="col">Subversion</th>
-							<th scope="col">Version</th>
-							<th scope="col">Country</th>
-						</tr>
-					</thead>
-					<tbody id="tablePeers">
-					</tbody>
-				</table>
+				<div class="table-responsive">
+					<table class="table">
+						<thead>
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Address</th>
+								<th scope="col">Port</th>
+								<th scope="col">Subversion</th>
+								<th scope="col">Version</th>
+								<th scope="col">Country</th>
+							</tr>
+						</thead>
+						<tbody id="tablePeers">
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</main>
@@ -158,6 +172,11 @@
 	<script src="/vendor/leaflet.js"></script>
 	<script src="/vendor/chart.js"></script>
 	<script src="/js/main.js"></script>
+	<script src="/js/widget.js"></script>
+	<script>
+		DigiByteCrawler('count', 'count');
+		DigiByteCrawler('countries', 'countries');
+	</script>
 </body>
 
 </html>

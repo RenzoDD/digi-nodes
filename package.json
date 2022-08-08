@@ -4,7 +4,7 @@
   "description": "Node scaner for the DigiByte blockchain",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "nodemon src/index.js",
     "test": "node src/test.js"
   },
   "repository": {

@@ -160,6 +160,7 @@ BEGIN
 	SELECT C.Name, C.Code, COUNT(*) AS Quantity
 	FROM Nodes AS N, Countries AS C
 	WHERE N.CountryID = C.CountryID
+			AND N.StateID = 2
     GROUP BY C.Name
 	ORDER BY Quantity DESC;
 END //
